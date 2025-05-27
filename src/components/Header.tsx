@@ -1,20 +1,53 @@
 
-import { ShoppingCart, User, Search, Menu } from 'lucide-react';
+import { ShoppingCart, User, Search, Menu, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface HeaderProps {
   onCartClick: () => void;
 }
 
 const Header = ({ onCartClick }: HeaderProps) => {
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      toast({
+        title: "Signed out",
+        description: "You've been signed out successfully.",
+      });
+      navigate('/');
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "Failed to sign out. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <header className="bg-white shadow-sm border-b sticky top-0 z-50">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex items-center space-x-4">
-            <h1 className="text-2xl font-bold text-blue-600">ShopZone</h1>
+            <h1 className="text-2xl font-bold text-blue-600 cursor-pointer" onClick={() => navigate('/')}>
+              ShopZone
+            </h1>
           </div>
 
           {/* Search Bar */}
@@ -47,10 +80,32 @@ const Header = ({ onCartClick }: HeaderProps) => {
 
           {/* User Actions */}
           <div className="flex items-center space-x-4">
-            <Button variant="ghost" size="sm">
-              <User className="h-5 w-5" />
-              <span className="hidden sm:ml-2 sm:inline">Account</span>
-            </Button>
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm">
+                    <User className="h-5 w-5" />
+                    <span className="hidden sm:ml-2 sm:inline">
+                      {user.user_metadata?.full_name || user.email}
+                    </span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem>Profile</DropdownMenuItem>
+                  <DropdownMenuItem>Orders</DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleSignOut}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button variant="ghost" size="sm" onClick={() => navigate('/auth')}>
+                <User className="h-5 w-5" />
+                <span className="hidden sm:ml-2 sm:inline">Sign In</span>
+              </Button>
+            )}
             <Button variant="ghost" size="sm" onClick={onCartClick}>
               <ShoppingCart className="h-5 w-5" />
               <span className="hidden sm:ml-2 sm:inline">Cart</span>
