@@ -2,6 +2,8 @@
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { X, Plus, Minus, ShoppingBag } from 'lucide-react';
+import { useCart } from '@/contexts/CartContext';
+import { useToast } from '@/hooks/use-toast';
 
 interface CartProps {
   isOpen: boolean;
@@ -9,27 +11,30 @@ interface CartProps {
 }
 
 const Cart = ({ isOpen, onClose }: CartProps) => {
-  // Mock cart items - will be replaced with real data from Supabase
-  const cartItems = [
-    {
-      id: 1,
-      name: "Premium Wireless Headphones",
-      price: 199.99,
-      quantity: 1,
-      image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=100&h=100&fit=crop"
-    },
-    {
-      id: 2,
-      name: "Smart Fitness Watch",
-      price: 299.99,
-      quantity: 2,
-      image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=100&h=100&fit=crop"
-    }
-  ];
-
-  const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const { items, updateQuantity, removeFromCart, getTotalPrice, clearCart } = useCart();
+  const { toast } = useToast();
   const shipping = 9.99;
-  const total = subtotal + shipping;
+  const subtotal = getTotalPrice();
+  const total = subtotal + (subtotal > 0 ? shipping : 0);
+
+  const handleCheckout = () => {
+    if (items.length === 0) return;
+    
+    toast({
+      title: "Checkout Started",
+      description: "Redirecting to checkout page...",
+    });
+    
+    // Here you would integrate with your payment processor
+    setTimeout(() => {
+      clearCart();
+      onClose();
+      toast({
+        title: "Order Placed!",
+        description: "Your order has been successfully placed.",
+      });
+    }, 2000);
+  };
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
@@ -37,12 +42,12 @@ const Cart = ({ isOpen, onClose }: CartProps) => {
         <SheetHeader>
           <SheetTitle className="flex items-center">
             <ShoppingBag className="h-5 w-5 mr-2" />
-            Shopping Cart ({cartItems.length})
+            Shopping Cart ({items.length})
           </SheetTitle>
         </SheetHeader>
 
         <div className="flex flex-col h-full">
-          {cartItems.length === 0 ? (
+          {items.length === 0 ? (
             <div className="flex-1 flex items-center justify-center">
               <div className="text-center">
                 <ShoppingBag className="h-16 w-16 text-gray-300 mx-auto mb-4" />
@@ -55,7 +60,7 @@ const Cart = ({ isOpen, onClose }: CartProps) => {
             <>
               <div className="flex-1 overflow-y-auto py-6">
                 <div className="space-y-6">
-                  {cartItems.map((item) => (
+                  {items.map((item) => (
                     <div key={item.id} className="flex items-center space-x-4">
                       <img 
                         src={item.image} 
@@ -64,18 +69,30 @@ const Cart = ({ isOpen, onClose }: CartProps) => {
                       />
                       <div className="flex-1">
                         <h4 className="font-medium text-gray-900">{item.name}</h4>
-                        <p className="text-lg font-semibold text-blue-600">${item.price}</p>
+                        <p className="text-lg font-semibold text-blue-600">${item.price.toFixed(2)}</p>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                        >
                           <Minus className="h-3 w-3" />
                         </Button>
                         <span className="w-8 text-center">{item.quantity}</span>
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                        >
                           <Plus className="h-3 w-3" />
                         </Button>
                       </div>
-                      <Button variant="ghost" size="sm">
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => removeFromCart(item.id)}
+                      >
                         <X className="h-4 w-4" />
                       </Button>
                     </div>
@@ -88,15 +105,22 @@ const Cart = ({ isOpen, onClose }: CartProps) => {
                   <span>Subtotal</span>
                   <span>${subtotal.toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span>Shipping</span>
-                  <span>${shipping.toFixed(2)}</span>
-                </div>
+                {subtotal > 0 && (
+                  <div className="flex justify-between">
+                    <span>Shipping</span>
+                    <span>${shipping.toFixed(2)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between text-lg font-semibold">
                   <span>Total</span>
                   <span>${total.toFixed(2)}</span>
                 </div>
-                <Button className="w-full bg-blue-600 hover:bg-blue-700" size="lg">
+                <Button 
+                  className="w-full bg-blue-600 hover:bg-blue-700" 
+                  size="lg"
+                  onClick={handleCheckout}
+                  disabled={items.length === 0}
+                >
                   Checkout
                 </Button>
                 <Button variant="outline" className="w-full" onClick={onClose}>

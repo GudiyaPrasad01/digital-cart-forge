@@ -2,20 +2,25 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Star, Heart, ShoppingCart } from 'lucide-react';
+import { useCart } from '@/contexts/CartContext';
+import { useToast } from '@/hooks/use-toast';
 
 const ProductGrid = () => {
+  const { addToCart } = useCart();
+  const { toast } = useToast();
+
   const products = [
     {
       id: 1,
-      name: "Wireless Mouse",
-      price: 29.99,
-      image: "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=300&h=300&fit=crop",
+      name: "Wireless Bluetooth Headphones",
+      price: 79.99,
+      image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&h=300&fit=crop",
       rating: 4.5,
       reviews: 89
     },
     {
       id: 2,
-      name: "Laptop Stand",
+      name: "Adjustable Laptop Stand",
       price: 49.99,
       image: "https://images.unsplash.com/photo-1527142879-bfb37a1c92de?w=300&h=300&fit=crop",
       rating: 4.7,
@@ -23,7 +28,7 @@ const ProductGrid = () => {
     },
     {
       id: 3,
-      name: "Coffee Mug",
+      name: "Premium Coffee Mug",
       price: 15.99,
       image: "https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=300&h=300&fit=crop",
       rating: 4.3,
@@ -31,7 +36,7 @@ const ProductGrid = () => {
     },
     {
       id: 4,
-      name: "Desk Organizer",
+      name: "Bamboo Desk Organizer",
       price: 24.99,
       image: "https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=300&h=300&fit=crop",
       rating: 4.6,
@@ -39,7 +44,7 @@ const ProductGrid = () => {
     },
     {
       id: 5,
-      name: "Phone Case",
+      name: "iPhone 14 Case",
       price: 19.99,
       image: "https://images.unsplash.com/photo-1556656793-08538906a9f8?w=300&h=300&fit=crop",
       rating: 4.4,
@@ -47,13 +52,43 @@ const ProductGrid = () => {
     },
     {
       id: 6,
-      name: "Water Bottle",
+      name: "Stainless Steel Water Bottle",
       price: 22.99,
       image: "https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=300&h=300&fit=crop",
       rating: 4.8,
       reviews: 201
+    },
+    {
+      id: 7,
+      name: "Wireless Charging Pad",
+      price: 34.99,
+      image: "https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=300&h=300&fit=crop",
+      rating: 4.5,
+      reviews: 145
+    },
+    {
+      id: 8,
+      name: "Bluetooth Speaker",
+      price: 59.99,
+      image: "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=300&h=300&fit=crop",
+      rating: 4.6,
+      reviews: 187
     }
   ];
+
+  const handleAddToCart = (product: typeof products[0]) => {
+    addToCart({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.image
+    });
+    
+    toast({
+      title: "Added to cart",
+      description: `${product.name} has been added to your cart.`,
+    });
+  };
 
   return (
     <section className="py-16">
@@ -110,7 +145,11 @@ const ProductGrid = () => {
                   <span className="text-lg font-bold text-blue-600">
                     ${product.price}
                   </span>
-                  <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
+                  <Button 
+                    size="sm" 
+                    className="bg-blue-600 hover:bg-blue-700"
+                    onClick={() => handleAddToCart(product)}
+                  >
                     <ShoppingCart className="h-4 w-4" />
                   </Button>
                 </div>

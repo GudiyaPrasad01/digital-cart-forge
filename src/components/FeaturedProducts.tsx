@@ -2,11 +2,16 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Star, Heart } from 'lucide-react';
+import { useCart } from '@/contexts/CartContext';
+import { useToast } from '@/hooks/use-toast';
 
 const FeaturedProducts = () => {
+  const { addToCart } = useCart();
+  const { toast } = useToast();
+
   const featuredProducts = [
     {
-      id: 1,
+      id: 101,
       name: "Premium Wireless Headphones",
       price: 199.99,
       originalPrice: 249.99,
@@ -16,7 +21,7 @@ const FeaturedProducts = () => {
       badge: "Best Seller"
     },
     {
-      id: 2,
+      id: 102,
       name: "Smart Fitness Watch",
       price: 299.99,
       originalPrice: 349.99,
@@ -26,7 +31,7 @@ const FeaturedProducts = () => {
       badge: "New"
     },
     {
-      id: 3,
+      id: 103,
       name: "Designer Backpack",
       price: 89.99,
       originalPrice: 119.99,
@@ -36,6 +41,20 @@ const FeaturedProducts = () => {
       badge: "Sale"
     }
   ];
+
+  const handleAddToCart = (product: typeof featuredProducts[0]) => {
+    addToCart({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.image
+    });
+    
+    toast({
+      title: "Added to cart",
+      description: `${product.name} has been added to your cart.`,
+    });
+  };
 
   return (
     <section className="py-16 bg-gray-50">
@@ -98,7 +117,10 @@ const FeaturedProducts = () => {
                   </div>
                 </div>
                 
-                <Button className="w-full bg-blue-600 hover:bg-blue-700">
+                <Button 
+                  className="w-full bg-blue-600 hover:bg-blue-700"
+                  onClick={() => handleAddToCart(product)}
+                >
                   Add to Cart
                 </Button>
               </CardContent>

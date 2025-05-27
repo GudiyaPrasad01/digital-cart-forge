@@ -3,7 +3,8 @@ import { ShoppingCart, User, Search, Menu, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useCart } from '@/contexts/CartContext';
+import { useNavigate, Link } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import {
   DropdownMenu,
@@ -19,6 +20,7 @@ interface HeaderProps {
 
 const Header = ({ onCartClick }: HeaderProps) => {
   const { user, signOut } = useAuth();
+  const { getTotalItems } = useCart();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -45,9 +47,9 @@ const Header = ({ onCartClick }: HeaderProps) => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex items-center space-x-4">
-            <h1 className="text-2xl font-bold text-blue-600 cursor-pointer" onClick={() => navigate('/')}>
+            <Link to="/" className="text-2xl font-bold text-blue-600 cursor-pointer">
               ShopZone
-            </h1>
+            </Link>
           </div>
 
           {/* Search Bar */}
@@ -64,18 +66,18 @@ const Header = ({ onCartClick }: HeaderProps) => {
 
           {/* Navigation */}
           <nav className="hidden md:flex items-center space-x-6">
-            <a href="#" className="text-gray-700 hover:text-blue-600 transition-colors">
+            <Link to="/" className="text-gray-700 hover:text-blue-600 transition-colors">
               Home
-            </a>
-            <a href="#" className="text-gray-700 hover:text-blue-600 transition-colors">
+            </Link>
+            <Link to="/products" className="text-gray-700 hover:text-blue-600 transition-colors">
               Products
-            </a>
-            <a href="#" className="text-gray-700 hover:text-blue-600 transition-colors">
+            </Link>
+            <Link to="/categories" className="text-gray-700 hover:text-blue-600 transition-colors">
               Categories
-            </a>
-            <a href="#" className="text-gray-700 hover:text-blue-600 transition-colors">
+            </Link>
+            <Link to="/about" className="text-gray-700 hover:text-blue-600 transition-colors">
               About
-            </a>
+            </Link>
           </nav>
 
           {/* User Actions */}
@@ -109,9 +111,11 @@ const Header = ({ onCartClick }: HeaderProps) => {
             <Button variant="ghost" size="sm" onClick={onCartClick}>
               <ShoppingCart className="h-5 w-5" />
               <span className="hidden sm:ml-2 sm:inline">Cart</span>
-              <span className="ml-1 bg-blue-600 text-white text-xs rounded-full px-2 py-1">
-                0
-              </span>
+              {getTotalItems() > 0 && (
+                <span className="ml-1 bg-blue-600 text-white text-xs rounded-full px-2 py-1">
+                  {getTotalItems()}
+                </span>
+              )}
             </Button>
             <Button variant="ghost" size="sm" className="md:hidden">
               <Menu className="h-5 w-5" />
